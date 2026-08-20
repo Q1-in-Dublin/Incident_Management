@@ -12,7 +12,12 @@ Java 21 · Spring Boot 4.1.0 · Gradle · PostgreSQL · Spring Data JPA · Flywa
 
 ## Running locally
 
-_To be documented once the core vertical slice (Phase 1) lands._
+1. Start Postgres (Docker Compose setup lands in Phase 3; for now, any local Postgres on the port below works).
+2. Copy `.env.example` to `.env` and adjust if needed, then export it:
+   ```
+   export $(cat .env | xargs)
+   ```
+3. Run the app or tests — `spring.datasource.*` is read entirely from environment variables, no defaults are baked into `application.yml`.
 
 ## Tests
 
