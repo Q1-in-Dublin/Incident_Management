@@ -11,7 +11,6 @@ import java.util.UUID;
 
 public interface IncidentRepository extends JpaRepository<Incident, UUID> {
 
-    // TODO: JPQL로 status/priority가 null이면 조건을 건너뛰는 검색 쿼리 작성
 @Query("SELECT i FROM Incident i WHERE (:status IS NULL OR i.status = :status) AND (:priority IS NULL OR i.priority = :priority)")
     Page<Incident> search(@Param("status") IncidentStatus status, @Param("priority") IncidentPriority priority, Pageable pageable);
 

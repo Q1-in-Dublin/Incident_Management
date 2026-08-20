@@ -1,6 +1,7 @@
 package com.qindublin.incidentapi.incident;
 
 import com.qindublin.incidentapi.incident.dto.CreateIncidentRequest;
+import com.qindublin.incidentapi.incident.dto.UpdateStatusRequest;
 import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -93,5 +95,41 @@ class IncidentControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.size").value(1));
+    }
+
+    @Test
+    void updateStatusAllowsValidTransition() throws Exception {
+        String id = createIncident();
+
+        mockMvc.perform(patch("/api/v1/incidents/{id}/status", id)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateStatusRequest(IncidentStatus.IN_PROGRESS))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
+    }
+
+    @Test
+    void updateStatusRejectsInvalidTransitionWith409() throws Exception {
+        String id = createIncident();
+
+        mockMvc.perform(patch("/api/v1/incidents/{id}/status", id)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateStatusRequest(IncidentStatus.IN_PROGRESS))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(patch("/api/v1/incidents/{id}/status", id)
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new UpdateStatusRequest(IncidentStatus.OPEN))))
+                .andExpect(status().isConflict());
+    }
+
+    private String createIncident() throws Exception {
+        var request = new CreateIncidentRequest("Status transition probe", "description", IncidentPriority.MEDIUM);
+        String response = mockMvc.perform(post("/api/v1/incidents")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readTree(response).get("id").asString();
     }
 }
