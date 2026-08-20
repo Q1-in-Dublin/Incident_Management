@@ -3,6 +3,10 @@ package com.qindublin.incidentapi.incident;
 import com.qindublin.incidentapi.incident.dto.CreateIncidentRequest;
 import com.qindublin.incidentapi.incident.dto.IncidentResponse;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,5 +30,14 @@ public class IncidentController{
     @GetMapping("/{id}")
     public IncidentResponse getIncident(@PathVariable UUID id) {
         return IncidentResponse.from(incidentService.getIncident(id));
+    }
+
+    @GetMapping
+    public Page<IncidentResponse> listIncidents(
+            @RequestParam(required = false) IncidentStatus status,
+            @RequestParam(required = false) IncidentPriority priority,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<Incident> incidents = incidentService.listIncidents(status, priority, pageable);
+        return incidents.map(IncidentResponse::from);
     }
 }
