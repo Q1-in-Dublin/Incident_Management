@@ -1,3 +1,7 @@
 spring:
   application:
     name: incidentapi
+  datasource:
+    url: jdbc:postgresql://localhost:5434/incidentdb
+    username: postgres
+    password: postgres
