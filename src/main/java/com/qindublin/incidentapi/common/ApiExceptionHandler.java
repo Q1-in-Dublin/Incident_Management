@@ -1,6 +1,7 @@
 package com.qindublin.incidentapi.common;
 
 import com.qindublin.incidentapi.incident.IncidentNotFoundException;
+import com.qindublin.incidentapi.incident.InvalidStatusTransitionException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -16,6 +17,12 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handleNotFound(IncidentNotFoundException ex) {
         ErrorResponse body = ErrorResponse.of(HttpStatus.NOT_FOUND.value(), "Not Found", ex.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTransition(InvalidStatusTransitionException ex) {
+        ErrorResponse body = ErrorResponse.of(HttpStatus.CONFLICT.value(), "Conflict", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

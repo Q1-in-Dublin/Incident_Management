@@ -2,6 +2,7 @@ package com.qindublin.incidentapi.incident;
 
 import com.qindublin.incidentapi.incident.dto.CreateIncidentRequest;
 import com.qindublin.incidentapi.incident.dto.IncidentResponse;
+import com.qindublin.incidentapi.incident.dto.UpdateStatusRequest;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -39,5 +40,13 @@ public class IncidentController{
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Page<Incident> incidents = incidentService.listIncidents(status, priority, pageable);
         return incidents.map(IncidentResponse::from);
+    }
+
+    // TODO: @PatchMapping("/{id}/status")
+    //   method signature: public IncidentResponse updateStatus(@PathVariable UUID id, @Valid @RequestBody UpdateStatusRequest request)
+    //   body: one line, IncidentResponse.from(incidentService.updateStatus(id, request.status()))
+   @PatchMapping("/{id}/status")
+    public IncidentResponse updateStatus(@PathVariable UUID id, @Valid @RequestBody UpdateStatusRequest request){
+        return IncidentResponse.from(incidentService.updateStatus(id, request.status()));
     }
 }
