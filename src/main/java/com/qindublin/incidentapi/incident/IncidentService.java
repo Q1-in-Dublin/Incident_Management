@@ -1,6 +1,8 @@
 package com.qindublin.incidentapi.incident;
 
 import com.qindublin.incidentapi.incident.dto.CreateIncidentRequest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
@@ -21,5 +23,9 @@ public class IncidentService {
     public Incident getIncident(UUID id) {
         return incidentRepository.findById(id)
                 .orElseThrow(() -> new IncidentNotFoundException(id));
+    }
+
+    public Page<Incident> listIncidents(IncidentStatus status, IncidentPriority priority, Pageable pageable) {
+        return incidentRepository.search(status, priority, pageable);
     }
 }

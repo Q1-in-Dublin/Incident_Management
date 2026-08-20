@@ -63,4 +63,35 @@ class IncidentControllerTest {
         mockMvc.perform(get("/api/v1/incidents/{id}", UUID.randomUUID()))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void listFiltersByPriority() throws Exception {
+        String uniqueTitle = "Filter probe " + UUID.randomUUID();
+        var request = new CreateIncidentRequest(uniqueTitle, "description", IncidentPriority.CRITICAL);
+
+        mockMvc.perform(post("/api/v1/incidents")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/incidents")
+                        .param("priority", "CRITICAL")
+                        .param("size", "100"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[?(@.title == '" + uniqueTitle + "')]").exists());
+    }
+
+    @Test
+    void listRespectsPageSize() throws Exception {
+        var request = new CreateIncidentRequest("Page size probe", "description", IncidentPriority.LOW);
+        mockMvc.perform(post("/api/v1/incidents")
+                        .contentType(APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/incidents").param("size", "1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.size").value(1));
+    }
 }
